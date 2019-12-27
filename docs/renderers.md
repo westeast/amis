@@ -1,7 +1,13 @@
-### 渲染器手册
+---
+title: 渲染器手册
+---
 
-amis 页面是通过 JSON 配置出来的，是由一个一个渲染模型组成的，掌握他们规则，就能灵活配置出各种页面。
+amis 页面是通过 JSON 配置出来的，是由一个一个渲染模型组成的，掌握他们规则，就能灵活配置出各种页面。 
 
+开始之前，请您一定要先阅读[基本用法](./basic.md)。
+
+-   [Definitions](./renderers/Definitions.md): 建立当前页面公共的配置项
+-   [Tpl](./renderers/Tpl.md): 支持用 JS 模板引擎来组织输出
 -   [Page](./renderers/Page.md): JSON 配置最外层的 Page 渲染器
 -   [Form](./renderers/Form/Form.md): 表单渲染器
     -   [FormItem](./renderers/Form/FormItem.md): Form 中主要是由各种 FormItem 组成
@@ -20,12 +26,14 @@ amis 页面是通过 JSON 配置出来的，是由一个一个渲染模型组成
     -   [Email](./renderers/Form/Email.md): Email 输入框
     -   [Password](./renderers/Form/Password.md): 密码输入框
     -   [Number](./renderers/Form/Number.md): 数字输入框
-    -   [Divider](./renderers/Form/Divider.md): 分割线
+    -   [Tag](./renderers/Form/Tag.md): 标签输入框
     -   [Select](./renderers/Form/Select.md): 选项表单
     -   [Chained-Select](./renderers/Form/Chained-Select.md): 无限级别下拉
     -   [Checkbox](./renderers/Form/Checkbox.md): 勾选框
     -   [Checkboxes](./renderers/Form/Checkboxes.md): 复选框
     -   [Radios](./renderers/Form/Radios.md): 单选框
+    -   [City](./renderers/Form/City.md): 城市选择
+    -   [Rating](./renderers/Form/Rating.md): 评分
     -   [Switch](./renderers/Form/Switch.md): 可选框，和 checkbox 完全等价
     -   [Date](./renderers/Form/Date.md): 日期类型
     -   [Datetime](./renderers/Form/Datetime.md): 日期时间类型
@@ -33,7 +41,7 @@ amis 页面是通过 JSON 配置出来的，是由一个一个渲染模型组成
     -   [Date-Range](./renderers/Form/Date-Range.md): 日期范围类型
     -   [Color](./renderers/Form/Color.md): 颜色选择器
     -   [Range](./renderers/Form/Range.md): 范围输入框
-    -   [Image](./renderers/Form/Image.md): 图片格式输
+    -   [Image](./renderers/Form/Image.md): 图片输入
     -   [File](./renderers/Form/File.md): 文件输入
     -   [Matrix](./renderers/Form/Matrix.md): 矩阵类型的输入框
     -   [Tree](./renderers/Form/Tree.md): 树形结构输入框
@@ -53,12 +61,13 @@ amis 页面是通过 JSON 配置出来的，是由一个一个渲染模型组成
     -   [Editor](./renderers/Form/Editor.md): 编辑器
     -   [Static](./renderers/Static.md): 纯用来展现数据的
 -   [Wizard](./renderers/Wizard.md): 表单向导
--   [Tpl](./renderers/Tpl.md): 支持用 JS 模板引擎来组织输出
+-   [Each](./renderers/Each.md): 基于现有变量循环输出渲染器
 -   [Plain](./renderers/Plain.md): 单纯的文字输出
 -   [Html](./renderers/Html.md): html, 当需要用到变量时，请用 Tpl 代替
 -   [Action](./renderers/Action.md): 一种特殊的渲染器，它本身是一个按钮，同时它能触发事件
 -   [Dialog](./renderers/Dialog.md): Dialog 由 Action 触发。他是一个类似于 Page 的容器模型
 -   [Drawer](./renderers/Drawer.md): Drawer 由 Action 触发
+-   [Divider](./renderers/Divider.md): 分割线
 -   [CRUD](./renderers/CRUD.md): 增删改查模型，主要用来展现列表
     -   [CRUD-Table](./renderers/CRUD-Table.md): 请参考 Table
     -   [CRUD-Cards](./renderers/CRUD-Cards.md): 请参考 Cards
@@ -69,6 +78,7 @@ amis 页面是通过 JSON 配置出来的，是由一个一个渲染模型组成
 -   [Chart](./renderers/Chart.md): 图表渲染器
 -   [Collapse](./renderers/Collapse.md): 折叠器
 -   [Carousel](./renderers/Carousel.md): 轮播图
+-   [Alert](./renderers/Alert.md): 提示框
 -   [Audio](./renderers/Audio.md): 音频播放器
 -   [Video](./renderers/Video.md): 视频播放器
 -   [Table](./renderers/Table.md): 表格展示

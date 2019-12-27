@@ -1,11 +1,9 @@
-import * as React from 'react';
-import {
-    toast
-} from '../../src/components/Toast';
+import React from 'react';
+import {toast} from '../../src/components/Toast';
 import {render} from '../../src/index';
-import * as axios from 'axios';
+import axios from 'axios';
 import Frame from 'react-frame-component';
-import * as stripJsonComments from 'strip-json-comments';
+import stripJsonComments from 'strip-json-comments';
 import CodeEditor from '../../src/components/Editor';
 
 const DEFAULT_CONTENT = `{
@@ -18,14 +16,14 @@ const DEFAULT_CONTENT = `{
 }`;
 
 const scopes = {
-    'none': ``,
+  'none': ``,
 
-    'body': `{
+  'body': `{
         "type": "page",
         "body": SCHEMA_PLACEHOLDER
     }`,
 
-    'form': `{
+  'form': `{
         "type": "page",
         "body": {
             "title": "",
@@ -39,7 +37,7 @@ const scopes = {
         }
     }`,
 
-    'form-item': `{
+  'form-item': `{
         "type": "page",
         "body": {
             "title": "",
@@ -53,238 +51,247 @@ const scopes = {
             "actions": []
         }
     }`
-
 };
 
 export default class PlayGround extends React.Component {
+  state = null;
+  startX = 0;
+  oldContents = '';
+  frameTemplate;
 
-    state = null;
-    startX = 0;
-    oldContents = '';
-    frameTemplate;
+  static defaultProps = {
+    useIFrame: false,
+    vertical: false
+  };
 
-    static defaultProps = {
-        useIFrame: false,
-        vertical: false
+  constructor(props) {
+    super(props);
+
+    const schema = this.buildSchema(props.code || DEFAULT_CONTENT, props);
+    this.state = {
+      asideWidth: props.asideWidth || Math.max(300, window.innerWidth * 0.3),
+      schema: schema,
+      schemaCode: JSON.stringify(schema, null, 2)
     };
 
-    constructor(props) {
-        super(props);
-
-        const schema = this.buildSchema(props.code || DEFAULT_CONTENT, props);
-        this.state = {
-            asideWidth: props.asideWidth || Math.max(300, window.innerWidth * 0.3),
-            schema: schema,
-            schemaCode: JSON.stringify(schema, null, 2)
+    this.handleMouseDown = this.handleMouseDown.bind(this);
+    this.handleMouseMove = this.handleMouseMove.bind(this);
+    this.handleMouseUp = this.handleMouseUp.bind(this);
+    this.removeWindowEvents = this.removeWindowEvents.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.schemaProps = {
+      style: {
+        height: '100%'
+      }
+    };
+    this.env = {
+      updateLocation: () => {},
+      fetcher: config => {
+        config = {
+          dataType: 'json',
+          ...config
         };
 
-        this.handleMouseDown = this.handleMouseDown.bind(this);
-        this.handleMouseMove = this.handleMouseMove.bind(this);
-        this.handleMouseUp = this.handleMouseUp.bind(this);
-        this.removeWindowEvents = this.removeWindowEvents.bind(this);
-        this.handleChange = this.handleChange.bind(this);
-        this.schemaProps = {
-            style: {
-                height: '100%'
-            }
-        };
-        this.env = {
-            updateLocation: () => {
-            },
-            fetcher: config => {
-                config = {
-                    dataType: 'json',
-                    ...config
-                };
-
-                if (config.dataType === 'json' && config.data) {
-                    config.data = JSON.stringify(config.data)
-                    config.headers = config.headers || {};
-                    config.headers['Content-Type'] = 'application/json';
-                }
-
-                return axios[config.method](config.url, config.data, config);
-            },
-            notify: (type, msg) => toast[type] ? toast[type](msg, type === 'error' ? '系统错误' : '系统消息') : console.warn('[Notify]', type, msg)
+        if (config.dataType === 'json' && config.data) {
+          config.data = JSON.stringify(config.data);
+          config.headers = config.headers || {};
+          config.headers['Content-Type'] = 'application/json';
         }
 
-        const links = [].slice.call(document.head.querySelectorAll('link,style')).map(item => item.outerHTML);
-        this.frameTemplate = `<!DOCTYPE html><html><head>${links.join('')}</head><body><div></div></body></html>`;
-        this.handleEditorMount = this.handleEditorMount.bind(this);
+        return axios[config.method](config.url, config.data, config);
+      },
+      notify: (type, msg) =>
+        toast[type]
+          ? toast[type](msg, type === 'error' ? '系统错误' : '系统消息')
+          : console.warn('[Notify]', type, msg)
+    };
+
+    const links = [].slice
+      .call(document.head.querySelectorAll('link,style'))
+      .map(item => item.outerHTML);
+    this.frameTemplate = `<!DOCTYPE html><html><head>${links.join(
+      ''
+    )}</head><body><div></div></body></html>`;
+  }
+
+  componentWillReceiveProps(nextprops) {
+    const props = this.props;
+
+    if (props.code !== nextprops.code) {
+      const schema = this.buildSchema(
+        nextprops.code || DEFAULT_CONTENT,
+        nextprops
+      );
+      this.setState({
+        schema: schema,
+        schemaCode: JSON.stringify(schema, null, 2)
+      });
     }
+  }
 
-    componentWillReceiveProps(nextprops) {
-        const props = this.props;
+  componentDidMount() {
+    this.props.setAsideFolded && this.props.setAsideFolded(true);
+  }
 
-        if (props.code !== nextprops.code) {
-            const schema = this.buildSchema(nextprops.code || DEFAULT_CONTENT, nextprops);
-            this.setState({
-                schema: schema,
-                schemaCode: JSON.stringify(schema, null, 2)
-            });
-        }
-    }
+  componentWillUnmount() {
+    this.props.setAsideFolded && this.props.setAsideFolded(false);
+  }
 
-    componentDidMount() {
-        this.props.setAsideFolded && this.props.setAsideFolded(true);
-    }
+  buildSchema(schemaContent, props = this.props) {
+    const query = props.location.query;
 
-    componentWillUnmount() {
-        this.props.setAsideFolded && this.props.setAsideFolded(false);
-    }
+    try {
+      const scope = query.scope || props.scope;
 
-    buildSchema(schemaContent, props = this.props) {
-        const query = props.location.query;
-
-        try {
-            const scope = query.scope || props.scope;
-
-            if (scope && scopes[scope]) {
-                schemaContent = scopes[scope].replace('SCHEMA_PLACEHOLDER', schemaContent);
-            }
-
-            schemaContent = stripJsonComments(schemaContent).replace(/('|")raw:/g, '$1'); // 去掉注释
-
-            return JSON.parse(schemaContent);
-        } catch (e) {
-            console.error(this.formatMessage(e.message, schemaContent));
-        }
-
-        return {};
-    }
-
-    formatMessage(message, input) {
-        if (/position\s?(\d+)$/.test(message)) {
-            const lines = input.substring(0, parseInt(RegExp.$1, 10)).split(/\n|\r\n|\r/);
-            message = `Json 语法错误，请检测。出错位置：${lines.length}，列：${lines[lines.length -1].length}。`;
-        }
-
-        return message;
-    }
-
-    renderPreview() {
-        const schema = this.state.schema;
-
-        if (!this.props.useIFrame) {
-            return render(schema, this.schemaProps, this.env);
-        }
-
-        return (
-            <Frame
-                width="100%"
-                height="100%"
-                frameBorder={0}
-                initialContent={this.frameTemplate}
-            >
-                {render(schema, this.schemaProps, this.env)}
-            </Frame>
+      if (scope && scopes[scope]) {
+        schemaContent = scopes[scope].replace(
+          'SCHEMA_PLACEHOLDER',
+          schemaContent
         );
+      }
+
+      schemaContent = stripJsonComments(schemaContent).replace(
+        /('|")raw:/g,
+        '$1'
+      ); // 去掉注释
+
+      return JSON.parse(schemaContent);
+    } catch (e) {
+      console.error(this.formatMessage(e.message, schemaContent));
     }
 
-    handleEditorMount(editor, monaco) {
-        monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-            enableSchemaRequest: true,
-            validate: true
-        });
+    return {};
+  }
+
+  formatMessage(message, input) {
+    if (/position\s?(\d+)$/.test(message)) {
+      const lines = input
+        .substring(0, parseInt(RegExp.$1, 10))
+        .split(/\n|\r\n|\r/);
+      message = `Json 语法错误，请检测。出错位置：${lines.length}，列：${
+        lines[lines.length - 1].length
+      }。`;
     }
 
-    handleChange(value) {
-        this.setState({
-            schemaCode: value
-        });
+    return message;
+  }
 
-        try {
-            const schema = JSON.parse(value);
+  renderPreview() {
+    const schema = this.state.schema;
 
-            this.setState({
-                schema
-            });
-        } catch (e) {
-            //ignore
-        }
+    if (!this.props.useIFrame) {
+      return render(schema, this.schemaProps, this.env);
     }
 
-    handleMouseDown(e) {
-        this.startX = e.clientX;
-        this.startWidth = this.state.asideWidth;
+    return (
+      <Frame
+        width="100%"
+        height="100%"
+        frameBorder={0}
+        initialContent={this.frameTemplate}
+      >
+        {render(schema, this.schemaProps, this.env)}
+      </Frame>
+    );
+  }
 
-        // this.startPosition.y = e.clientY;
+  handleChange(value) {
+    this.setState({
+      schemaCode: value
+    });
 
-        window.addEventListener('mouseup', this.handleMouseUp);
-        window.addEventListener('mousemove', this.handleMouseMove);
-        return false;
+    try {
+      const schema = JSON.parse(value);
+
+      this.setState({
+        schema
+      });
+    } catch (e) {
+      //ignore
     }
+  }
 
-    handleMouseMove(e) {
-        const diff = this.startX - e.clientX;
-        e.preventDefault();
+  handleMouseDown(e) {
+    this.startX = e.clientX;
+    this.startWidth = this.state.asideWidth;
 
-        this.setState({
-            asideWidth: Math.min(800, Math.max(200, this.startWidth + diff))
-        });
-    }
+    // this.startPosition.y = e.clientY;
 
-    handleMouseUp() {
-        this.removeWindowEvents();
-    }
+    window.addEventListener('mouseup', this.handleMouseUp);
+    window.addEventListener('mousemove', this.handleMouseMove);
+    return false;
+  }
 
-    removeWindowEvents() {
-        window.removeEventListener('mouseup', this.handleMouseUp);
-        window.removeEventListener('mousemove', this.handleMouseMove);
-    }
+  handleMouseMove(e) {
+    const diff = this.startX - e.clientX;
+    e.preventDefault();
 
-    renderEditor() {
-        return (
-            <CodeEditor
-                value={this.state.schemaCode}
-                onChange={this.handleChange}
-                language="json"
-                editorDidMount={this.handleEditorMount}
-            />
-        );
-    }
+    this.setState({
+      asideWidth: Math.min(800, Math.max(200, this.startWidth + diff))
+    });
+  }
 
-    render() {
-        const {
-            vertical
-        } = this.props;
-        if (vertical) {
-            return (
-                <div className="vbox">
-                    <div className="row-row">
-                        <div className="cell pos-rlt">
-                            <div className="scroll-y h-full pos-abt w-full">
-                                {this.renderPreview()}
-                            </div>
-                        </div>
-                    </div>
-                    <div className="row-row" style={{height: 200}}>
-                        <div className="cell">
-                            {this.renderEditor()}
-                        </div>
-                    </div>
-                </div>
-            );
-        }
+  handleMouseUp() {
+    this.removeWindowEvents();
+  }
 
-        return (
-            <div style={{
-                position: "absolute",
-                top: 50,
-                bottom: 0
-            }}>
-                <div className="hbox">
-                    <div className="col pos-rlt">
-                        <div className="scroll-y h-full pos-abt w-full">
-                            {this.renderPreview()}
-                        </div>
-                    </div>
-                    <div className="col bg-light lter b-l bg-auto pos-rlt" style={{width: this.state.asideWidth}}>
-                        <div className="resizer" onMouseDown={this.handleMouseDown}></div>
-                        {this.renderEditor()}
-                    </div>
-                </div>
+  removeWindowEvents() {
+    window.removeEventListener('mouseup', this.handleMouseUp);
+    window.removeEventListener('mousemove', this.handleMouseMove);
+  }
+
+  renderEditor() {
+    return (
+      <CodeEditor
+        value={this.state.schemaCode}
+        onChange={this.handleChange}
+        language="json"
+      />
+    );
+  }
+
+  render() {
+    const {vertical} = this.props;
+    if (vertical) {
+      return (
+        <div className="vbox">
+          <div className="row-row">
+            <div className="cell pos-rlt">
+              <div className="scroll-y h-full pos-abt w-full">
+                {this.renderPreview()}
+              </div>
             </div>
-        );
+          </div>
+          <div className="row-row" style={{height: 200}}>
+            <div className="cell">{this.renderEditor()}</div>
+          </div>
+        </div>
+      );
     }
+
+    return (
+      <div
+        style={{
+          position: 'absolute',
+          top: 50,
+          bottom: 0
+        }}
+      >
+        <div className="hbox">
+          <div className="col pos-rlt">
+            <div className="scroll-y h-full pos-abt w-full">
+              {this.renderPreview()}
+            </div>
+          </div>
+          <div
+            className="col bg-light lter b-l bg-auto pos-rlt"
+            style={{width: this.state.asideWidth}}
+          >
+            <div className="resizer" onMouseDown={this.handleMouseDown} />
+            {this.renderEditor()}
+          </div>
+        </div>
+      </div>
+    );
+  }
 }

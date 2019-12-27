@@ -1,6 +1,8 @@
 ## Page
 
-Json 配置最外层是一个 `Page` 渲染器。他主要包含标题，副标题，提示信息等设置，需要注意的是，他有三个容器区域分别是：内容区、边栏区和工具条区，在容器里面放不同的渲染器，就能配置出不同的页面来。
+页面渲染器，他主要包含标题，副标题，提示信息等设置，需要注意的是，他有三个容器区域分别是：内容区、边栏区和工具条区，在容器里面放不同的渲染器，就能配置出不同的页面来。
+
+可以配置 `initApi` 从远端拉取数据，拉取的数据可以在整个页面级别使用。
 
 ```schema:height="200"
 {
@@ -9,8 +11,9 @@ Json 配置最外层是一个 `Page` 渲染器。他主要包含标题，副标�
   "subTitle": "SubTitle",
   "remark": "Remark",
   "aside": "Aside",
-  "body": "Body",
-  "toolbar": "Toolbar"
+  "body": "时间: ${date | date}",
+  "toolbar": "Toolbar",
+  "initApi": "/api/mock2/service/data"
 }
 ```
 
@@ -36,3 +39,47 @@ Json 配置最外层是一个 `Page` 渲染器。他主要包含标题，副标�
 | interval            | `number`                          | `3000`                                     | 刷新时间(最低 3000)                                                                 |
 | silentPolling       | `boolean`                         | `false`                                    | 配置刷新时是否显示加载动画                                                          |
 | stopAutoRefreshWhen | `string`                          | `""`                                       | 通过[表达式](./Types.md#表达式)来配置停止刷新的条件                                 |
+
+
+### 接口说明
+
+开始之前请你先阅读[整体要求](../api.md)。
+
+#### initApi
+
+Page 渲染器可以配置 initApi 来拉取后端数据。
+
+**发送：**
+
+默认不发送任何参数，如果有需要，在这可以取地址栏上的参数，假如地址栏携带了 id=1 这个参数, 那么接口这么配置就能把 id 作为 query 参数发送给后端。
+
+```json
+{
+  "initApi": "/api/xxx?id=${id}"
+}
+```
+
+**响应：**
+
+data 返回是对象即可。
+
+```json
+{
+  "status": 0,
+  "msg": "",
+  "data": {
+    "a": 1
+  }
+}
+```
+
+当配置了 initApi 且返回如上数据后，当前 page 渲染器，以及所有孩子渲染器都能取到这个这个变量了如：
+
+
+```json
+{
+  "type": "page",
+  "initApi": "/api/xxx",
+  "body": "${a}"
+}
+```

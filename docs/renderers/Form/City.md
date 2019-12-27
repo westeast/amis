@@ -6,7 +6,7 @@
 -   `allowDistrict` 默认 `true` 允许输入区域
 -   `allowCity`  默认 `true` 允许输入城市
 -   `extractValue`  默认 `true` 是否抽取值，如果设置成 `false` 值格式会变成对象，包含 `code`、`province`、`city` 和 `district` 文字信息。
--   更多配置请参考 [FormItem](./FormItem.md)
+-   **还有更多通用配置请参考** [FormItem](./FormItem.md)
 
 ```schema:height="200" scope="form"
 [
@@ -44,7 +44,7 @@
 ]
 ```
 
-从上面的栗子可以看出来，值默认格式是编码（即 `code`），如果你想要详细点的信息，可以把 `extractValue` 设置成 `false`。
+从上面的例子可以看出来，值默认格式是编码（即 `code`），如果你想要详细点的信息，可以把 `extractValue` 设置成 `false`。
 
 ```schema:height="200" scope="form"
 [

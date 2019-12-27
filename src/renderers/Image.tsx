@@ -1,72 +1,128 @@
-import * as React from 'react';
+import React from 'react';
 import {Renderer, RendererProps} from '../factory';
-import {ServiceStore, IServiceStore} from '../store/service';
-import {Api, SchemaNode} from '../types';
 import {filter} from '../utils/tpl';
-import * as cx from 'classnames';
-import * as moment from 'moment';
+import {ClassNamesFn, themeable} from '../theme';
 
-export interface ImageProps extends RendererProps {
-    className?: string;
-    imageClassName?: string;
-    placeholder?: string;
-    description?: string;
+export interface ImageProps {
+  src: string;
+  title?: string;
+  alt?: string;
+  className?: string;
+  imageClassName?: string;
+  description?: string;
+  thumbMode?: 'w-full' | 'h-full' | 'contain' | 'cover';
+  thumbRatio?: '1-1' | '4-3' | '16-9';
+  classnames: ClassNamesFn;
+  classPrefix: string;
+  onLoad?: React.EventHandler<any>;
 }
 
-export class ImageField extends React.Component<ImageProps, object> {
-    static defaultProps: Partial<ImageProps> = {
-        className: 'thumb-lg',
-        imageClassName: 'r',
-        defaultImage: 'https://fex.bdstatic.com/n/static/amis/renderers/crud/field/placeholder_cfad9b1.png',
-    };
+export class Image extends React.Component<ImageProps> {
+  render() {
+    const {
+      classnames: cx,
+      className,
+      imageClassName,
+      thumbMode,
+      thumbRatio,
+      src,
+      alt,
+      title,
+      description,
+      onLoad
+    } = this.props;
 
-    render() {
-        const {
-            className,
-            defaultImage,
-            description,
-            title,
-            render,
-            data,
-            imageClassName,
-            classnames: cx,
-            src,
-        } = this.props;
+    return (
+      <div className={cx('Image', className)}>
+        <div
+          className={cx(
+            'Image-thumb',
+            thumbMode ? `Image-thumb--${thumbMode}` : '',
+            thumbRatio ? `Image-thumb--${thumbRatio}` : ''
+          )}
+        >
+          <img
+            onLoad={onLoad}
+            className={cx(imageClassName)}
+            src={src}
+            alt={alt}
+          />
+        </div>
+        {title || description ? (
+          <div key="caption" className={cx('Image-caption')}>
+            {title ? <div className={cx('Image-title')}>{title}</div> : null}
+            {description ? (
+              <div className={cx('Image-description')}>{description}</div>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+}
+const ThemedImage = themeable(Image);
+export default ThemedImage;
 
-        const finnalSrc = src ? filter(src) : '';
-        let value = this.props.value;
+export interface ImageFieldProps extends RendererProps {
+  className?: string;
+  imageClassName?: string;
+  placeholder: string;
+  description?: string;
+  thumbMode: 'w-full' | 'h-full' | 'contain' | 'cover';
+  thumbRatio: '1-1' | '4-3' | '16-9';
+}
 
-        return (
-            <div className={cx('ImageField', className)}>
-                <img className={imageClassName} src={finnalSrc || value || defaultImage} />
-                {title || description ? (
-                    <div key="caption" className={cx('ImageField-caption')}>
-                        {title ? <div className="text-md">{filter(title, data)}</div> : null}
-                        {render('description', description as string)}
-                    </div>
-                ) : null}
-            </div>
-        );
-    }
+export class ImageField extends React.Component<ImageFieldProps, object> {
+  static defaultProps: Pick<
+    ImageFieldProps,
+    'defaultImage' | 'thumbMode' | 'thumbRatio' | 'placeholder'
+  > = {
+    defaultImage:
+      'https://fex.bdstatic.com/n/static/amis/renderers/crud/field/placeholder_cfad9b1.png',
+    thumbMode: 'contain',
+    thumbRatio: '1-1',
+    placeholder: '-'
+  };
+
+  render() {
+    const {
+      className,
+      defaultImage,
+      description,
+      title,
+      data,
+      imageClassName,
+      classnames: cx,
+      src,
+      thumbMode,
+      thumbRatio,
+      placeholder
+    } = this.props;
+
+    const finnalSrc = src ? filter(src, data, '| raw') : '';
+    let value = finnalSrc || this.props.value || defaultImage;
+
+    return (
+      <div className={cx('ImageField', className)}>
+        {value ? (
+          <ThemedImage
+            imageClassName={imageClassName}
+            src={value}
+            title={filter(title, data)}
+            description={filter(description, data)}
+            thumbMode={thumbMode}
+            thumbRatio={thumbRatio}
+          />
+        ) : (
+          <span className="text-muted">{placeholder}</span>
+        )}
+      </div>
+    );
+  }
 }
 
 @Renderer({
-    test: /(^|\/)image$/,
-    name: 'image',
+  test: /(^|\/)image$/,
+  name: 'image'
 })
 export class ImageFieldRenderer extends ImageField {}
-
-@Renderer({
-    test: /(^|\/)images$/,
-})
-export class ImagesFieldRenderer extends ImageField {
-    static defaultProps: Partial<ImageProps> = {
-        ...ImageField.defaultProps,
-        multiple: true,
-        delimiter: ',',
-    };
-
-    render() {
-        return <p>Todo</p>;
-    }
-}

@@ -12,6 +12,8 @@
     "moduleResolution": "node",
     "rootDir": "src",
     "importHelpers": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "sourceRoot": "src",
     "noImplicitReturns": true,
     "noImplicitThis": true,

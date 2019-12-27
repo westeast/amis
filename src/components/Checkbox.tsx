@@ -3,107 +3,115 @@
  * @author fex
  */
 
-import * as React from 'react';
-import * as cx from 'classnames';
+import React from 'react';
+import cx from 'classnames';
 import {ClassNamesFn, themeable} from '../theme';
 import {autobind} from '../utils/helper';
+import {filter} from '../utils/tpl';
 
 const sizeMap = {
-    sm: 'i-checks-sm',
-    lg: 'i-checks-lg',
-    small: 'i-checks-sm',
-    large: 'i-checks-lg',
+  sm: 'i-checks-sm',
+  lg: 'i-checks-lg',
+  small: 'i-checks-sm',
+  large: 'i-checks-lg'
 };
 
 interface CheckboxProps {
-    id?: string;
-    key?: string | number;
-    style?: React.CSSProperties;
-    type?: string;
-    size?: 'sm' | 'lg' | 'small' | 'large';
-    label?: string;
-    className?: string;
-    onChange?: (value: any) => void;
-    value?: any;
-    containerClass?: string;
-    inline?: boolean;
-    trueValue?: boolean;
-    falseValue?: boolean;
-    disabled?: boolean;
-    readOnly?: boolean;
-    checked?: boolean;
-    name?: string;
-    classPrefix: string;
-    classnames: ClassNamesFn;
-    partial?: boolean;
+  id?: string;
+  key?: string | number;
+  style?: React.CSSProperties;
+  type: 'checkbox' | 'radio';
+  size?: 'sm' | 'lg' | 'small' | 'large';
+  label?: string;
+  labelClassName?: string;
+  className?: string;
+  onChange?: (value: any) => void;
+  value?: any;
+  containerClass?: string;
+  inline?: boolean;
+  trueValue?: boolean;
+  falseValue?: boolean;
+  disabled?: boolean;
+  readOnly?: boolean;
+  checked?: boolean;
+  name?: string;
+  description?: string;
+  classPrefix: string;
+  classnames: ClassNamesFn;
+  partial?: boolean;
+  data?: any;
 }
 
 export class Checkbox extends React.Component<CheckboxProps, any> {
-    static defaultProps = {
-        trueValue: true,
-        falseValue: false,
-        type: 'checkbox',
-    };
+  static defaultProps: Pick<
+    CheckboxProps,
+    'trueValue' | 'falseValue' | 'type'
+  > = {
+    trueValue: true,
+    falseValue: false,
+    type: 'checkbox'
+  };
 
-    @autobind
-    handleCheck(e: React.ChangeEvent<any>) {
-        const {trueValue, falseValue, onChange} = this.props;
+  @autobind
+  handleCheck(e: React.ChangeEvent<any>) {
+    const {trueValue, falseValue, onChange} = this.props;
 
-        if (!onChange) {
-            return;
-        }
-
-        onChange(e.currentTarget.checked ? trueValue : falseValue);
+    if (!onChange) {
+      return;
     }
 
-    render() {
-        let {
-            size,
-            className,
-            classPrefix: ns,
-            value,
-            label,
-            partial,
-            trueValue,
-            children,
-            disabled,
-            readOnly,
-            checked,
-            type,
-            name,
-        } = this.props;
+    onChange(e.currentTarget.checked ? trueValue : falseValue);
+  }
 
-        className = (className ? className : '') + (size && sizeMap[size] ? ` ${sizeMap[size]}` : '');
+  render() {
+    let {
+      size,
+      className,
+      classnames: cx,
+      value,
+      label,
+      partial,
+      trueValue,
+      children,
+      disabled,
+      description,
+      readOnly,
+      checked,
+      type,
+      name,
+      data,
+      labelClassName
+    } = this.props;
 
-        return (
-            <label
-                className={cx(
-                    `${ns}Checkbox ${ns}Checkbox--${type}`,
-                    {
-                        [`${ns}Checkbox--full`]: !partial,
-                    },
-                    className
-                )}
-            >
-                <input
-                    type={type}
-                    checked={
-                        typeof checked !== 'undefined'
-                            ? checked
-                            : typeof value === 'undefined'
-                            ? value
-                            : value == trueValue
-                    }
-                    onChange={this.handleCheck}
-                    disabled={disabled}
-                    readOnly={readOnly}
-                    name={name}
-                />
-                <i />
-                <span>{children || label}</span>
-            </label>
-        );
-    }
+    return (
+      <label
+        className={cx(`Checkbox Checkbox--${type}`, className, {
+          'Checkbox--full': !partial,
+          [`Checkbox--${size}`]: size
+        })}
+      >
+        <input
+          type={type}
+          checked={
+            typeof checked !== 'undefined'
+              ? checked
+              : typeof value === 'undefined'
+              ? value
+              : value == trueValue
+          }
+          onChange={this.handleCheck}
+          disabled={disabled}
+          readOnly={readOnly}
+          name={name}
+        />
+        <i />
+        <span className={cx(labelClassName)}>{children || label}</span>
+        {description ? (
+          <div className={cx('Checkbox-desc')}>{filter(description, data)}</div>
+        ) : null}
+      </label>
+    );
+  }
 }
 
 export default themeable(Checkbox);

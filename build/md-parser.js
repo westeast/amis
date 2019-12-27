@@ -149,6 +149,10 @@ module.exports = function(content, file) {
 
             // placeholder[index] = `<iframe class="doc-iframe" width="100%" height="${setting.height || 200}px" frameBorder="0" src="/play?code=${encodeURIComponent(code)}&scope=${encodeURIComponent(setting.scope)}"></iframe>`;
             if (lang === "html") {
+                if (~code.indexOf('<html')) {
+                    return _;
+                }
+
                 placeholder[
                     index
                 ] = `<div class="amis-doc"><div class="preview">${code}</div><pre><code class="lang-html">${
@@ -173,9 +177,11 @@ module.exports = function(content, file) {
         return placeholder[id] || "";
     });
 
-    content = fis.compile.partial(content, file, "html");
+    content = fis.compile.partial(content, file, "html") + `\n\n<div class="m-t-lg b-l b-info b-3x wrapper bg-light dk">文档内容有误？欢迎大家一起来编写，文档地址：<i class="fa fa-github"></i><a href="https://github.com/baidu/amis/tree/master${file.subpath}">${file.subpath}</a>。</div>`;
     info.html = content;
     info.toc = toc;
+
+    
 
     return "module.exports = " + JSON.stringify(info, null, 2) + ";";
 };

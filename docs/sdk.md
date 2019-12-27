@@ -1,76 +1,8 @@
 ---
-title: 如何使用
+title: 如何定制
 ---
 
-
-## 如何使用
-
-```bash
-npm i amis
-```
-
-安装完后可以在 React Component 这么使用。
-
-```tsx
-import * as React from 'react';
-import {
-    render as renderAmis
-} from 'amis';
-
-class MyComponent extends React.Component<any, any> {
-    render() {
-        return (
-            <div>
-                <p>通过 amis 渲染页面</p>
-                {renderAmis({
-                    // schema
-                    // 这里是 amis 的 Json 配置。
-                    type: 'page',
-                    title: '简单页面',
-                    body: '内容'
-                }, {
-                    // props
-                }, {
-                    // env
-                    // 这些是 amis 需要的一些接口实现
-                    // 可以参考本项目里面的 Demo 部分代码。
-
-                    updateLocation: (location:string/*目标地址*/, replace:boolean/*是replace，还是push？*/) => {
-                        // 用来更新地址栏
-                    },
-
-                    jumpTo: (location:string/*目标地址*/) => {
-                        // 页面跳转， actionType:  link、url 都会进来。
-                    },
-
-                    fetcher: ({
-                        url,
-                        method,
-                        data,
-                        config
-                    }:{
-                        url:string/*目标地址*/,
-                        method:'get' | 'post' | 'put' | 'delete'/*发送方式*/,
-                        data: object | void/*数据*/,
-                        config: object/*其他配置*/
-                    }) => {
-                        // 用来发送 Ajax 请求，建议使用 axios
-                    },
-                    notify: (type:'error'|'success'/**/, msg:string/*提示内容*/) => {
-                        // 用来提示用户
-                    },
-                    alert: (content:string/*提示信息*/) => {
-                        // 另外一种提示，可以直接用系统框
-                    },
-                    confirm: (content:string/*提示信息*/) => {
-                        // 确认框。
-                    }
-                });}
-            </div>
-        );
-    }
-}
-```
+开始定制之前，请先仔细阅读工作原理。
 
 ## 工作原理
 
@@ -358,7 +290,7 @@ class MyFormItem extends React.Component {
                 {
                     "type": "custom",
                     "label": "随机值",
-                    "name": "randon"
+                    "name": "random"
                 }
             ]
         }
@@ -400,5 +332,5 @@ class MyFormItem extends React.Component {
 }
 ```
 
-即：通过 `children` 传递一个React组件，这个示例是一个React Stateless Functional Component，也可以是传统的 React 组件。
-任何节点如果包含 `children` 这个属性，则都会把当前节点交给 `children` 来处理，跳过了从 amis 渲染器池子中选择渲染器的过程。
+即：通过 `children` 实现一个自定义渲染方法，返回 React.ReactNode 节点。
+任何节点如果包含 `children` 这个属性，则都会把当前节点交给 `children` 来处理，跳过了从 amis 渲染器池子中选择渲染器的过程。`children` 属性其实更应该叫 `render` 属性，但是历史原因不能改了。与之类似的还有个 `component` 属性，这个属性可以传入 React Component，如果想用 React.hooks，请通过 `component` 传递，而不是 `children`。

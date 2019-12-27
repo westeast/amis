@@ -11,7 +11,9 @@
 -   `extractValue` 默认为 `false`, `joinValues`设置为`false`时生效, 开启后将选中的选项 value 的值封装为数组，作为当前表单项的值。
 -   `delimiter` 默认为 `,`
 -   `columnsCount` 默认为 `1` 可以配置成一行显示多个。
--   更多配置请参考 [FormItem](./FormItem.md)
+-   `checkAll` 默认为 `false` 开启后支持全选
+-   `defaultCheckAll` 是否默认全选，默认为`false`
+-   **还有更多通用配置请参考** [FormItem](./FormItem.md)
 
 ```schema:height="330" scope="form"
 [
@@ -45,4 +47,41 @@
         "label": "当前值"
     }
 ]
+```
+
+
+### 接口说明
+
+开始之前请你先阅读[整体要求](../api.md)。
+
+#### source
+
+**发送**
+
+默认 GET，不携带数据，可从上下文中取数据设置进去。
+
+**响应**
+
+格式要求如下：
+
+```json
+{
+  "status": 0,
+  "msg": "",
+  "data": {
+    "options": [
+      {
+        "label": "描述",
+        "value": "值"
+      },
+
+      {
+        "label": "描述2",
+        "value": "值2"
+      }
+    ],
+
+    "value": "值" // 默认值，可以获取列表的同时设置默认值。
+  }
+}
 ```

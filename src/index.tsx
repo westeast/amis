@@ -1,54 +1,67 @@
-/**
- * @file 文件入口
- * @author fex
+/** @license amis v@version
+ *
+ * Copyright Baidu
+ *
+ * This source code is licensed under the Apache license found in the
+ * LICENSE file in the root directory of this source tree.
  */
-
-import {render, Renderer, getRendererByName, resolveRenderer, filterSchema} from './factory';
+import {
+  render,
+  Renderer,
+  getRendererByName,
+  resolveRenderer,
+  filterSchema
+} from './factory';
 import {wrapFetcher, buildApi} from './utils/api';
-import {filter, reigsterTplEnginer} from './utils/tpl'
+import {filter, reigsterTplEnginer, evalExpression} from './utils/tpl';
 import './utils/tpl-builtin';
 import './utils/tpl-lodash';
 import * as utils from './utils/helper';
 import {resizeSensor} from './utils/resize-sensor';
-import {setIconVendor} from './renderers/Form/IconPicker-icons';
+import {setIconVendor} from './renderers/Form/IconPickerIcons';
+import {Icon, registerIcon} from './components/icons';
 
 import {
-    NotFound,
-    AlertComponent,
-    alert,
-    confirm,
-    AsideNav,
-    Button,
-    Checkbox,
-    Checkboxes,
-    Collapse,
-    ColorPicker,
-    DatePicker,
-    DateRangePicker,
-    Drawer,
-    DropdownButton,
-    // Editor,
-    Icons,
-    Html,
-    Layout,
-    LazyComponent,
-    Modal,
-    Overlay,
-    PopOver,
-    Radios,
-    Range,
-    Rating,
-    // RichText,
-    Select,
-    Spinner,
-    Switch,
-    Textarea,
-    TitleBar,
-    ToastComponent,
-    toast,
-    Tooltip,
-    TooltipWrapper,
-    Tree
+  NotFound,
+  AlertComponent,
+  alert,
+  ContextMenu,
+  openContextMenus,
+  Alert2,
+  confirm,
+  AsideNav,
+  Button,
+  Checkbox,
+  Checkboxes,
+  Collapse,
+  ColorPicker,
+  DatePicker,
+  DateRangePicker,
+  Drawer,
+  Tabs,
+  Tab,
+  // Editor,
+  Icons,
+  Html,
+  Layout,
+  LazyComponent,
+  Modal,
+  Overlay,
+  PopOver,
+  Radios,
+  Range,
+  Rating,
+  // RichText,
+  Select,
+  Spinner,
+  Switch,
+  Textarea,
+  TitleBar,
+  ToastComponent,
+  toast,
+  Tooltip,
+  TooltipWrapper,
+  Tree
 } from './components/index';
 
 // 注册渲染器
@@ -59,6 +72,7 @@ import './renderers/ButtonGroup';
 import './renderers/ButtonToolbar';
 import './renderers/DropDownButton';
 import './renderers/Collapse';
+import './renderers/Color';
 import './renderers/CRUD';
 import './renderers/Pagination';
 import './renderers/Cards';
@@ -122,6 +136,7 @@ import './renderers/Grid';
 import './renderers/HBox';
 import './renderers/VBox';
 import './renderers/Image';
+import './renderers/Images';
 import './renderers/List';
 import './renderers/Operation';
 import './renderers/Page';
@@ -153,87 +168,97 @@ import './renderers/Icon';
 import './renderers/Carousel';
 import Scoped, {ScopedContext} from './Scoped';
 
-import {
-    FormItem
-} from './renderers/Form/Item';
+import {FormItem} from './renderers/Form/Item';
 
 // 兼容旧版本用法
 import './compat';
 
-import {
-    classPrefix,
-    classnames
-} from './themes/default';
+import './themes/default';
 import './themes/cxd';
-import { registerFilter, filterDate, relativeValueRe, resolveVariable } from './utils/tpl-builtin';
-import { addRule, str2rules } from './utils/validations';
-import { normalizeOptions } from './components/Select';
-import { OptionsControl } from './renderers/Form/Options';
+import './themes/dark';
+import {
+  registerFilter,
+  filterDate,
+  relativeValueRe,
+  resolveVariable
+} from './utils/tpl-builtin';
+import {addRule, str2rules} from './utils/validations';
+import {normalizeOptions} from './components/Select';
+import {OptionsControl} from './renderers/Form/Options';
+
+import {classnames, getClassPrefix, setDefaultTheme} from './theme';
+const classPrefix = getClassPrefix();
 
 export {
-    render,
-    Renderer,
-    FormItem,
-    OptionsControl,
-    wrapFetcher,
-    buildApi,
-    filter,
-
-    NotFound,
-    AlertComponent,
-    alert,
-    confirm,
-    AsideNav,
-    Button,
-    Checkbox,
-    Checkboxes,
-    Collapse,
-    ColorPicker,
-    DatePicker,
-    DateRangePicker,
-    Drawer,
-    DropdownButton,
-    // Editor,
-    Html,
-    Icons,
-    Layout,
-    LazyComponent,
-    Modal,
-    Overlay,
-    PopOver,
-    Radios,
-    Range,
-    Rating,
-    // RichText,
-    Select,
-    Spinner,
-    Switch,
-    Textarea,
-    TitleBar,
-    ToastComponent,
-    toast,
-    Tooltip,
-    TooltipWrapper,
-    Tree,
-    
-    // 其他功能类方法
-    utils,
-    resizeSensor,
-    registerFilter,
-    reigsterTplEnginer,
-    addRule,
-    str2rules,
-    normalizeOptions,
-    getRendererByName,
-    resolveRenderer,
-    filterSchema,
-    filterDate,
-    relativeValueRe,
-    resolveVariable,
-    setIconVendor,
-    Scoped,
-    ScopedContext,
-
-    classPrefix,
-    classnames
+  render,
+  Renderer,
+  FormItem,
+  OptionsControl,
+  wrapFetcher,
+  buildApi,
+  filter,
+  NotFound,
+  AlertComponent,
+  alert,
+  ContextMenu,
+  openContextMenus,
+  Alert2,
+  confirm,
+  AsideNav,
+  Button,
+  Checkbox,
+  Checkboxes,
+  Collapse,
+  ColorPicker,
+  DatePicker,
+  DateRangePicker,
+  Drawer,
+  Tabs,
+  Tab,
+  // Editor,
+  Html,
+  Icons,
+  Layout,
+  LazyComponent,
+  Modal,
+  Overlay,
+  PopOver,
+  Radios,
+  Range,
+  Rating,
+  // RichText,
+  Select,
+  Spinner,
+  Switch,
+  Textarea,
+  TitleBar,
+  ToastComponent,
+  toast,
+  Tooltip,
+  TooltipWrapper,
+  Tree,
+  // 其他功能类方法
+  utils,
+  resizeSensor,
+  registerFilter,
+  reigsterTplEnginer,
+  evalExpression,
+  addRule,
+  str2rules,
+  normalizeOptions,
+  getRendererByName,
+  resolveRenderer,
+  filterSchema,
+  filterDate,
+  relativeValueRe,
+  resolveVariable,
+  setIconVendor,
+  Icon,
+  registerIcon,
+  Scoped,
+  ScopedContext,
+  setDefaultTheme,
+  classPrefix,
+  getClassPrefix,
+  classnames
 };

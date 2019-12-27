@@ -74,7 +74,7 @@
 }
 ```
 
-### Field 通用配置
+### 通用配置
 
 -   `name` 绑定变量名。
 -   `placeholder` 当没有值时的展示内容。
@@ -84,8 +84,8 @@
 -   `quickEdit` 配置后在内容区增加一个编辑按钮，点击后弹出一个编辑框。
     `boolean` 简单的开启或者关闭
     `Object` 快速编辑详情，请参考 [FormItem](./FormItem.md) 配置。
-    `.mode` 模式如果设置为 `inline` 模式，则直接展示输入框，而不需要点击按钮后展示。
-    `.saveImmediately` 开启后，直接保存，而不是等全部操作完后批量保存。
+    `mode` 模式如果设置为 `inline` 模式，则直接展示输入框，而不需要点击按钮后展示。
+    `saveImmediately` 开启后，直接保存，而不是等全部操作完后批量保存。
 -   `copyable` 配置后会在内容区增加一个复制按钮，点击后把内容复制到剪切板。
     todo
 
@@ -99,15 +99,16 @@
 
 ### Json(Field)
 
-todo
+-   `type` 请设置为 `json`。
+-   `levelExpand` 开始展开的层级，默认为 1，如设置不展开，则设置为 0
 
 ### Date(Field)
 
 用来显示日期。
 
 -   `type` 请设置为 `date`。
--   `format` 默认为 `YYYY-MM-DD`，时间格式，请参考 moment 中的格式用法。
--   `valueFormat` 默认为 `X`，时间格式，请参考 moment 中的格式用法。
+-   `format` 默认为 `YYYY-MM-DD`，时间格式，请参考 [moment](http://momentjs.com/) 中的格式用法。
+-   `valueFormat` 默认为 `X`，时间格式，请参考 [moment](http://momentjs.com/) 中的格式用法。
 
 ### Mapping(Field)
 
