@@ -116,7 +116,8 @@ export default class CRUD extends React.Component<CRUDProps, any> {
     'labelField',
     'loadDataOnce',
     'loadDataOnceFetchOnFilter',
-    'source'
+    'source',
+    'header'
   ];
   static defaultProps = {
     toolbarInline: true,
@@ -300,7 +301,8 @@ export default class CRUD extends React.Component<CRUDProps, any> {
     e: React.UIEvent<any> | undefined,
     action: Action,
     ctx: object,
-    delegate?: boolean
+    throwErrors: boolean = false,
+    delegate?: IScopedContext
   ): any {
     const {
       onAction,
@@ -366,7 +368,7 @@ export default class CRUD extends React.Component<CRUDProps, any> {
         items: store.selectedItems.concat()
       });
     } else {
-      onAction(e, action, ctx);
+      onAction(e, action, ctx, throwErrors, delegate || this.context);
     }
   }
 
@@ -440,7 +442,7 @@ export default class CRUD extends React.Component<CRUDProps, any> {
           })
           .catch(() => null);
     } else if (onAction) {
-      onAction(e, action, ctx);
+      onAction(e, action, ctx, false, this.context);
     }
   }
 
@@ -1570,6 +1572,7 @@ export default class CRUD extends React.Component<CRUDProps, any> {
       itemActions,
       classnames: cx,
       keepItemSelectionOnPageChange,
+      onAction,
       ...rest
     } = this.props;
 

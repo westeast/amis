@@ -295,6 +295,10 @@ export function registerFilter(
   filters[name] = fn;
 }
 
+export function getFilters() {
+  return filters;
+}
+
 export function pickValues(names: string, data: object) {
   let arr: Array<string>;
   if (!names || ((arr = names.split(',')) && arr.length < 2)) {
@@ -351,11 +355,13 @@ export const resolveVariable = (path: string, data: any = {}): any => {
   }, data);
 };
 
-export const isPureVariable = (path: string) =>
-  /^\$(?:([a-z0-9_.]+)|{[^}{]+})$/.test(path);
+export const isPureVariable = (path?: any) =>
+  typeof path === 'string'
+    ? /^\$(?:([a-z0-9_.]+)|{[^}{]+})$/.test(path)
+    : false;
 
 export const resolveVariableAndFilter = (
-  path: string,
+  path?: string,
   data: object = {},
   defaultFilter: string = '| html'
 ): any => {
@@ -557,8 +563,10 @@ export function dataMapping(to: any, from: PlainObject): any {
   return ret;
 }
 
-reigsterTplEnginer('builtin', {
-  test: str => !!~str.indexOf('$'),
-  compile: (str: string, data: object, defaultFilter = '| html') =>
-    tokenize(str, data, defaultFilter)
-});
+export function register() {
+  reigsterTplEnginer('builtin', {
+    test: str => !!~str.indexOf('$'),
+    compile: (str: string, data: object, defaultFilter = '| html') =>
+      tokenize(str, data, defaultFilter)
+  });
+}

@@ -61,6 +61,7 @@ export interface ComboProps extends FormControlProps {
   tabsStyle: '' | 'line' | 'card' | 'radio';
   tabsLabelTpl?: string;
   lazyLoad?: boolean;
+  changeImmediately?: boolean;
   strictMode?: boolean;
   messages?: {
     validateFailed?: string;
@@ -107,7 +108,11 @@ export default class ComboControl extends React.Component<ComboProps> {
     'tabsMode',
     'tabsStyle',
     'lazyLoad',
-    'strictMode'
+    'changeImmediately',
+    'strictMode',
+    'controls',
+    'conditions',
+    'messages'
   ];
 
   subForms: Array<any> = [];
@@ -122,6 +127,7 @@ export default class ComboControl extends React.Component<ComboProps> {
   sortable?: Sortable;
   defaultValue?: any;
   toDispose: Array<Function> = [];
+  id: string = guid();
   constructor(props: ComboProps) {
     super(props);
 
@@ -150,7 +156,7 @@ export default class ComboControl extends React.Component<ComboProps> {
     });
 
     formItem && formItem.setSubStore(store);
-    this.toDispose.push(addHook(this.flush, 'flush'));
+    addHook && this.toDispose.push(addHook(this.flush, 'flush'));
   }
 
   componentWillReceiveProps(nextProps: ComboProps) {
@@ -168,6 +174,17 @@ export default class ComboControl extends React.Component<ComboProps> {
 
       if (store.activeKey >= values.length) {
         store.setActiveKey(Math.max(0, values.length - 1));
+      }
+
+      // combo 进来了新的值，且这次 form 初始化时带来的新值变化，但是之前的值已经 onInit 过了
+      // 所以，之前 onInit 设置进去的初始值是过时了的。这个时候修复一下。
+      if (nextProps.value !== props.value && !props.formInited && this.subFormDefaultValues.length) {
+        this.subFormDefaultValues = this.subFormDefaultValues.map((item, index) => {
+          return {
+            ...item,
+            values: values[index]
+          }
+        })  
       }
     }
   }
@@ -358,17 +375,13 @@ export default class ComboControl extends React.Component<ComboProps> {
       setPrinstineValue
     } = this.props;
 
-    if (syncDefaultValue === false || disabled) {
-      return;
-    }
-
     this.subFormDefaultValues.push({
       index,
       values,
       setted: false
     });
 
-    if (this.subFormDefaultValues.length !== this.subForms.length) {
+    if (syncDefaultValue === false || disabled || this.subFormDefaultValues.length !== this.subForms.length) {
       return;
     }
 
@@ -405,11 +418,14 @@ export default class ComboControl extends React.Component<ComboProps> {
   }
 
   handleSingleFormInit(values: any) {
-    this.props.syncDefaultValue !== false &&
-      this.props.setPrinstineValue &&
-      this.props.setPrinstineValue({
+    const {syncDefaultValue, setPrinstineValue, value} = this.props;
+
+
+    if (syncDefaultValue !== false && isObjectShallowModified(value, values) && setPrinstineValue) {
+      setPrinstineValue({
         ...values
-      });
+      })
+    }
   }
 
   handleAction(action: Action): any {
@@ -473,7 +489,7 @@ export default class ComboControl extends React.Component<ComboProps> {
     this.sortable = new Sortable(
       dom.querySelector(`.${ns}Combo-items`) as HTMLElement,
       {
-        group: 'combo',
+        group: `combo-${this.id}`,
         animation: 150,
         handle: `.${ns}Combo-itemDrager`,
         ghostClass: `${ns}Combo-item--dragging`,
@@ -631,7 +647,8 @@ export default class ComboControl extends React.Component<ComboProps> {
       addIcon,
       deleteIcon,
       tabsLabelTpl,
-      conditions
+      conditions,
+      changeImmediately
     } = this.props;
 
     let controls = this.props.controls;
@@ -776,6 +793,8 @@ export default class ComboControl extends React.Component<ComboProps> {
                       onAction: this.handleAction,
                       ref: this.makeFormRef(index),
                       canAccessSuperData,
+                      lazyChange: changeImmediately ? false : true,
+                      lazyFormChange: changeImmediately ? false : true,
                       value: undefined,
                       formItemValue: undefined
                     }
@@ -823,7 +842,8 @@ export default class ComboControl extends React.Component<ComboProps> {
       deleteIcon,
       noBorder,
       conditions,
-      lazyLoad
+      lazyLoad,
+      changeImmediately
     } = this.props;
 
     let controls = this.props.controls;
@@ -948,6 +968,8 @@ export default class ComboControl extends React.Component<ComboProps> {
                             onInit: this.handleFormInit,
                             onAction: this.handleAction,
                             ref: this.makeFormRef(index),
+                            lazyChange: changeImmediately ? false : true,
+                            lazyFormChange: changeImmediately ? false : true,
                             lazyLoad,
                             canAccessSuperData,
                             value: undefined,

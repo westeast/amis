@@ -218,3 +218,23 @@
 .#{$ns}Dialog-error {
   color: $danger;
 }
+
+.#{$ns}Modal--full {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  > .#{$ns}Modal-content {
+    flex-basis: 0;
+    flex-grow: 1;
+    margin: 30px;
+    width: calc(100% - 60px);
+    max-width: unset;
+
+    > .#{$ns}Modal-body {
+      height: 0;
+      overflow: auto;
+    }
+  }
+}
