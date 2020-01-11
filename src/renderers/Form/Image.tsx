@@ -14,7 +14,7 @@ import Button from '../../components/Button';
 // @ts-ignore
 import accepts from 'attr-accept';
 import {getNameFromUrl} from './File';
-import ImageComponent from '../Image';
+import ImageComponent, {ImageThumbProps} from '../Image';
 
 let preventEvent = (e: any) => e.stopPropagation();
 
@@ -47,6 +47,14 @@ export interface ImageProps extends FormControlProps {
   multiple?: boolean;
   thumbMode?: 'w-full' | 'h-full' | 'contain' | 'cover';
   thumbRatio?: '1:1' | '4:3' | '16:9';
+  onImageEnlarge?: (
+    info: Pick<ImageThumbProps, 'src' | 'originalSrc' | 'title' | 'caption'> & {
+      index?: number;
+      list?: Array<
+        Pick<ImageThumbProps, 'src' | 'originalSrc' | 'title' | 'caption'>
+      >;
+    }
+  ) => void;
 }
 
 export interface ImageState {
@@ -430,7 +438,7 @@ export default class ImageControl extends React.Component<
           locked: false
         },
         () => {
-          this.onChange();
+          this.onChange(!!this.resolve);
 
           if (this.resolve) {
             this.resolve(
@@ -458,6 +466,26 @@ export default class ImageControl extends React.Component<
     );
   }
 
+  previewImage(file: FileX, index: number, e: React.MouseEvent<any>) {
+    const {onImageEnlarge} = this.props;
+
+    if (onImageEnlarge) {
+      const files = this.files;
+      e.preventDefault();
+
+      onImageEnlarge({
+        src: (file.preview || file.url) as string,
+        originalSrc: (file.preview || file.url) as string,
+        index,
+        list: files.map(file => ({
+          src: (file.preview || file.url) as string,
+          originalSrc: (file.preview || file.url) as string,
+          title: file.name || getNameFromUrl(file.value || file.url)
+        }))
+      });
+    }
+  }
+
   editImage(index: number) {
     const {multiple} = this.props;
 
@@ -471,7 +499,7 @@ export default class ImageControl extends React.Component<
     });
   }
 
-  onChange() {
+  onChange(changeImmediately?: boolean) {
     const {
       multiple,
       onChange,
@@ -505,7 +533,7 @@ export default class ImageControl extends React.Component<
         : newValue;
     }
 
-    onChange((this.emitValue = newValue));
+    onChange((this.emitValue = newValue), undefined, changeImmediately);
   }
 
   handleSelect() {
@@ -1029,16 +1057,20 @@ export default class ImageControl extends React.Component<
                                     <div>...</div>
                                   )}
 
-                                  {!disabled ? (
-                                    <a
-                                      data-tooltip="查看大图"
-                                      data-position="bottom"
-                                      target="_blank"
-                                      href={file.url || file.preview}
-                                    >
-                                      <Icon icon="view" className="icon" />
-                                    </a>
-                                  ) : null}
+                                  <a
+                                    data-tooltip="查看大图"
+                                    data-position="bottom"
+                                    target="_blank"
+                                    href={file.url || file.preview}
+                                    onClick={this.previewImage.bind(
+                                      this,
+                                      file,
+                                      key
+                                    )}
+                                  >
+                                    <Icon icon="view" className="icon" />
+                                  </a>
+
                                   {!!crop && !disabled ? (
                                     <a
                                       data-tooltip="裁剪图片"

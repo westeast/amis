@@ -27,7 +27,7 @@ export class ControlGroupRenderer extends React.Component<InputGroupProps> {
   }
 
   renderControl(control: any, index: any, otherProps?: any) {
-    const {render} = this.props;
+    const {render, disabled} = this.props;
 
     if (!control) {
       return null;
@@ -48,7 +48,8 @@ export class ControlGroupRenderer extends React.Component<InputGroupProps> {
     }
 
     return render(`${index}`, subSchema, {
-      ...otherProps
+      ...otherProps,
+      disabled
     });
   }
 

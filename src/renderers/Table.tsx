@@ -60,6 +60,7 @@ export interface TableProps extends RendererProps {
   draggable?: boolean;
   columnsTogglable?: boolean | 'auto';
   affixHeader?: boolean;
+  affixColumns?: boolean;
   combineNum?: number;
   footable?:
     | boolean
@@ -109,6 +110,7 @@ export default class Table extends React.Component<TableProps, object> {
     'selectable',
     'columnsTogglable',
     'affixHeader',
+    'affixColumns',
     'headerClassName',
     'footerClassName',
     'selected',
@@ -171,7 +173,7 @@ export default class Table extends React.Component<TableProps, object> {
     this.affixDetect = this.affixDetect.bind(this);
     this.updateTableInfoLazy = debounce(this.updateTableInfo.bind(this), 250, {
       trailing: true,
-      leading: false
+      leading: true
     });
     this.tableRef = this.tableRef.bind(this);
     this.affixedTableRef = this.affixedTableRef.bind(this);
@@ -339,6 +341,10 @@ export default class Table extends React.Component<TableProps, object> {
       store.updateSelected(nextProps.selected || [], nextProps.valueField);
       this.syncSelected();
     }
+  }
+
+  componentDidUpdate() {
+    this.updateTableInfoLazy();
   }
 
   componentWillUnmount() {
@@ -874,17 +880,33 @@ export default class Table extends React.Component<TableProps, object> {
     const store = this.props.store;
     const column = store.filteredColumns[target.colIndex].pristine;
 
+    let index = target.rowIndex;
     const list: Array<any> = [];
-    store.rows.forEach(row => {
+    store.rows.forEach((row, i) => {
       const src = resolveVariable(column.name, row.data);
+
+      if (!src) {
+        if (i < target.rowIndex) {
+          index--;
+        }
+        return;
+      }
 
       list.push({
         src,
         originalSrc: column.originalSrc
           ? filter(column.originalSrc, row.data)
           : src,
-        title: column.title ? filter(column.title, row.data) : undefined,
-        caption: column.caption ? filter(column.caption, row.data) : undefined
+        title: column.enlargeTitle
+          ? filter(column.enlargeTitle, row.data)
+          : column.title
+          ? filter(column.title, row.data)
+          : undefined,
+        caption: column.enlargeCaption
+          ? filter(column.enlargeCaption, row.data)
+          : column.caption
+          ? filter(column.caption, row.data)
+          : undefined
       });
     });
 
@@ -894,7 +916,7 @@ export default class Table extends React.Component<TableProps, object> {
           {
             ...info,
             list,
-            index: target.rowIndex
+            index
           },
           target
         );
@@ -1831,6 +1853,7 @@ export default class Table extends React.Component<TableProps, object> {
       store,
       placeholder,
       classnames: cx,
+      affixColumns,
       data,
       render
     } = this.props;
@@ -1859,7 +1882,7 @@ export default class Table extends React.Component<TableProps, object> {
           onMouseLeave={this.handleMouseLeave}
         >
           <div className={cx('Table-fixedLeft')}>
-            {store.leftFixedColumns.length
+            {affixColumns !== false && store.leftFixedColumns.length
               ? this.renderFixedColumns(
                   store.leftFixedColumns,
                   false,
@@ -1868,7 +1891,7 @@ export default class Table extends React.Component<TableProps, object> {
               : null}
           </div>
           <div className={cx('Table-fixedRight')}>
-            {store.rightFixedColumns.length
+            {affixColumns !== false && store.rightFixedColumns.length
               ? this.renderFixedColumns(
                   store.rightFixedColumns,
                   false,
