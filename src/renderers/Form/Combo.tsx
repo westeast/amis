@@ -754,7 +754,8 @@ export default class ComboControl extends React.Component<ComboProps> {
               key={this.keys[index] || (this.keys[index] = guid())}
               toolbar={toolbar}
               eventKey={index}
-              mountOnEnter={true}
+              // 不能按需渲染，因为 unique 会失效。
+              mountOnEnter={false}
               unmountOnExit={false}
             >
               {condition && typeSwitchable !== false ? (
