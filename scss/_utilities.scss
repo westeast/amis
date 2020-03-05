@@ -1195,6 +1195,14 @@
   height: 360px;
 }
 
+.w-xxxl {
+  width: 420px;
+}
+
+.h-xxxl {
+  height: 420px;
+}
+
 .w-full {
   width: 100%;
 }
@@ -1213,6 +1221,10 @@
 
 .no-grow {
   flex-grow: unset !important;
+}
+
+.nowrap {
+  white-space: nowrap;
 }
 
 @include media-breakpoint-up(sm) {
