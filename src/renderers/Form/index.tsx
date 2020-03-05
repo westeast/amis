@@ -16,21 +16,22 @@ import {
   isVisible,
   cloneObject
 } from '../../utils/helper';
-import debouce = require('lodash/debounce');
-import flatten = require('lodash/flatten');
-import find = require('lodash/find');
+import debouce from 'lodash/debounce';
+import flatten from 'lodash/flatten';
+import find from 'lodash/find';
 import Scoped, {
   ScopedContext,
   IScopedContext,
   ScopedComponentType
 } from '../../Scoped';
 import {IComboStore} from '../../store/combo';
-import qs = require('qs');
+import qs from 'qs';
 import {dataMapping} from '../../utils/tpl-builtin';
 import {isApiOutdated, isEffectiveApi} from '../../utils/api';
 import Spinner from '../../components/Spinner';
 import {LazyComponent} from '../../components';
 import {isAlive} from 'mobx-state-tree';
+import {asFormItem} from './Item';
 export type FormGroup = FormSchema & {
   title?: string;
   className?: string;
@@ -279,7 +280,7 @@ export default class Form extends React.Component<FormProps, object> {
         .then(this.initInterval)
         .then(this.onInit);
     } else {
-      this.onInit();
+      setTimeout(this.onInit.bind(this), 4);
     }
   }
 
@@ -984,6 +985,12 @@ export default class Form extends React.Component<FormProps, object> {
           ...control,
           ...getExprProperties(control, store.data)
         };
+      }
+
+      if (control.component && control.label && control.name) {
+        control.component = asFormItem(control.options || {})(
+          control.component
+        );
       }
 
       control.hiddenOn && (subSchema.hiddenOn = control.hiddenOn);
