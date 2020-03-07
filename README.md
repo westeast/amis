@@ -1,5 +1,8 @@
 # amis
 
+>>生成sdk的方法：nvm use 10.0 && npm run sdk 
+如果有问题就用bash publish.sh 会报错（tsc生成type的报错不影响），这样用时要把node_modules/.bin放path里。typescript 版本3.3.4000
+
 前端低代码框架，通过 JSON 配置就能生成各种后台页面。
 
 目前在百度大量用于内部平台的前端开发，已有 100+ 部门使用，创建了 1.2w+ 页面。
