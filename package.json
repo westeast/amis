@@ -10,6 +10,7 @@
     "stop": "fis3 server stop",
     "dev": "fis3 release -cwd ./public",
     "publish2npm": "sh publish.sh && npm publish",
+    "sdk":"rm -rf sdk && fis3 release publish-sdk -c",
     "prettier": "prettier --write '{src,examples,scss}/**/*.{tsx,ts,jsx,scss}'"
   },
   "repository": {
@@ -105,7 +106,6 @@
     "@types/react-test-renderer": "^16.8.1",
     "@types/react-transition-group": "^2.0.6",
     "@types/sortablejs": "^1.3.32",
-    "@types/whatwg-fetch": "0.0.33",
     "animate.css": "3.5.2",
     "axios": "0.18.1",
     "bce-sdk-js": "^0.2.9",
